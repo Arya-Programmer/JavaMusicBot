@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 public class Listener extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Listener.class);
+    private final CommandManager manager = new CommandManager();
 
     @Override
     public void onReady(@Nonnull ReadyEvent event) {
@@ -30,6 +31,12 @@ public class Listener extends ListenerAdapter {
             LOGGER.info("Shutting Down");
             event.getJDA().shutdown();
             BotCommons.shutdown(event.getJDA());
+
+            return;
+        }
+
+        if (raw.startsWith(prefix)) {
+            manager.handle(event);
         }
     }
 }
