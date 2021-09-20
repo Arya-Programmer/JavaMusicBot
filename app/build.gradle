@@ -19,6 +19,7 @@ dependencies {
     implementation 'com.jagrosh:jda-utilities:3.0.1'
     implementation 'me.duncte123:botCommons:1.0.45'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'io.github.cdimascio:java-dotenv:5.1.1'
 }
 
 compileJava.options.encoding = 'UTF-8'
