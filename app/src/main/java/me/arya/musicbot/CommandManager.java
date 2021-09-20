@@ -2,9 +2,11 @@ package me.arya.musicbot;
 
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.ICommand;
+import me.arya.musicbot.command.commands.HelpCommand;
 import me.arya.musicbot.command.commands.PingCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ public class CommandManager {
 
     public CommandManager() {
         addCommand(new PingCommand());
+        addCommand(new HelpCommand(this));
     }
 
     private void addCommand(ICommand cmd) {
@@ -27,7 +30,12 @@ public class CommandManager {
         commands.add(cmd);
     }
 
-    private ICommand getCommand(String search) {
+    public List<ICommand> getCommands() {
+        return commands;
+    }
+
+    @Nullable
+    public ICommand getCommand(String search) {
         String searchLower = search.toLowerCase();
 
         for (ICommand cmd : this.commands) {
