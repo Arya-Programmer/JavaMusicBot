@@ -11,11 +11,15 @@ sourceCompatibility = 16.0
 
 repositories {
     mavenCentral()
+    maven {
+        name 'm2-dv8tion'
+        url 'https://m2.dv8tion.net/releases'
+    }
     jcenter()
 }
 
 dependencies {
-    implementation 'net.dv8tion:JDA:4.0.0_44'
+    implementation 'net.dv8tion:JDA:4.3.0_277'
     implementation 'com.jagrosh:jda-utilities:3.0.1'
     implementation 'me.duncte123:botCommons:1.0.45'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
