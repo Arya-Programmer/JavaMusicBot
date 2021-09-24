@@ -9,7 +9,7 @@ group = 'me.arya.musicbot'
 
 version '0.5'
 
-sourceCompatibility = 16.0
+sourceCompatibility = 15.0
 
 repositories {
     mavenCentral()
