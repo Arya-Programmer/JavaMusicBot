@@ -90,7 +90,8 @@ public class PlayCommand implements ICommand {
 
     private boolean isUrl(String url) {
         try {
-            return !String.valueOf(new URI(url)).equals(url);
+            final URI uri = new URI(url);
+            return !String.valueOf(uri).equals(url);
         } catch (URISyntaxException e) {
             return false;
         }

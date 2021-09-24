@@ -1,9 +1,6 @@
 package me.arya.musicbot;
 
-import io.github.cdimascio.dotenv.DotEnvException;
 import io.github.cdimascio.dotenv.Dotenv;
-
-import java.util.Map;
 
 public class Config {
 
