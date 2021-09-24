@@ -12,6 +12,7 @@ public class TrackScheduler extends AudioEventAdapter {
     public final AudioPlayer player;
     public final BlockingQueue<AudioTrack> queue;
     public boolean repeating = false;
+    public boolean queueLoop = false;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
@@ -24,12 +25,13 @@ public class TrackScheduler extends AudioEventAdapter {
                 this.player.startTrack(track.makeClone(), false);
                 return;
             }
+            //noinspection ResultOfMethodCallIgnored
             this.queue.offer(track);
         }
     }
 
     public void nextTrack() {
-        this.player.startTrack(this.queue.poll(), false);
+        this.player.startTrack(queueLoop ? this.queue.poll() : this.queue.peek(), false);
     }
 
     @Override
