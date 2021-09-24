@@ -51,6 +51,6 @@ public class JoinCommand implements ICommand {
 
     @Override
     public List<String> getAliases() {
-        return List.of("summon", "getHere", "BITCH");
+        return List.of("summon", "gethere", "bitch");
     }
 }
