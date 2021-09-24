@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.util.List;
 
 public class PauseCommand implements ICommand {
     @SuppressWarnings("ConstantConditions")
