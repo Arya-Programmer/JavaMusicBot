@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class PlayCommand implements ICommand {
@@ -19,6 +21,14 @@ public class PlayCommand implements ICommand {
     @Override
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
+
+        if (ctx.getArgs().isEmpty()) {
+            channel.sendMessage("Correct usage is `" +
+                    Config.get("prefix") +
+                    "play <YoutubeURL>`").queue();
+            return;
+        }
+
         final Member self = ctx.getSelfMember();
         final GuildVoiceState selfVoiceState = self.getVoiceState();
 
@@ -42,8 +52,14 @@ public class PlayCommand implements ICommand {
             return;
         }
 
+        String link = String.join(" ", ctx.getArgs());
+
+        if (!isUrl(link)) {
+            link = "ytsearch:" + link;
+        }
+
         PlayerManager.getInstance()
-                .loadAndPlay(channel, "https://www.youtube.com/watch?v=orJSJGHjBLI");
+                .loadAndPlay(channel, link);
     }
 
     @Override
@@ -62,5 +78,14 @@ public class PlayCommand implements ICommand {
     @Override
     public List<String> getAliases() {
         return List.of("sing", "p");
+    }
+
+    private boolean isUrl(String url) {
+        try {
+            new URI(url);
+            return true;
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 }

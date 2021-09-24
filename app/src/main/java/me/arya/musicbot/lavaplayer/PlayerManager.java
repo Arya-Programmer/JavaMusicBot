@@ -1,7 +1,6 @@
 package me.arya.musicbot.lavaplayer;
 
 
-import com.iwebpp.crypto.TweetNaclFast;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -12,7 +11,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerManager {
@@ -56,7 +58,22 @@ public class PlayerManager {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                final List<AudioTrack> tracks = playlist.getTracks();
+                if (isUrl(trackUrl)) {
 
+                    channel.sendMessage("Adding to queue: `")
+                            .append(String.valueOf(tracks.size()))
+                            .append("` tracks from playlist `")
+                            .append(playlist.getName())
+                            .append("`")
+                            .queue();
+
+                    for (final AudioTrack track : tracks) {
+                        musicManager.scheduler.queue(track);
+                    }
+                } else {
+                    trackLoaded(tracks.get(0));
+                }
             }
 
             @Override
@@ -76,5 +93,15 @@ public class PlayerManager {
             INSTANCE = new PlayerManager();
         }
         return INSTANCE;
+    }
+
+
+    private boolean isUrl(String url) {
+        try {
+            new URI(url);
+            return true;
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 }
