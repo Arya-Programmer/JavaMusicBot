@@ -5,7 +5,9 @@ import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.command.commands.HelpCommand;
 import me.arya.musicbot.command.commands.PingCommand;
 import me.arya.musicbot.command.commands.music.JoinCommand;
+import me.arya.musicbot.command.commands.music.PauseCommand;
 import me.arya.musicbot.command.commands.music.PlayCommand;
+import me.arya.musicbot.command.commands.music.StopCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nullable;
@@ -22,6 +24,8 @@ public class CommandManager {
         addCommand(new HelpCommand(this));
         addCommand(new JoinCommand());
         addCommand(new PlayCommand());
+        addCommand(new StopCommand());
+        addCommand(new PauseCommand());
     }
 
     private void addCommand(ICommand cmd) {
