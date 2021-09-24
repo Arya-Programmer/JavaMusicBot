@@ -1,6 +1,7 @@
 package me.arya.musicbot.command.commands.music;
 
 import me.arya.musicbot.command.CommandContext;
+import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
@@ -10,7 +11,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.List;
 
-public class RepeatCommand implements ICommand {
+public class LoopCommand implements ICommand {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void handle(CommandContext ctx) {
@@ -37,16 +38,33 @@ public class RepeatCommand implements ICommand {
         }
 
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
-        final boolean newRepeating = !musicManager.scheduler.repeating;
+        final EmbedMessage embedMessage = new EmbedMessage();
 
-        musicManager.scheduler.repeating = newRepeating;
+        final String repeatingOption = ctx.getArgs().isEmpty() ? "" : ctx.getArgs().get(0);
 
-        channel.sendMessageFormat("The player has been set to **%s**", newRepeating ? "repeating" : "not repeating").queue();
+        if (repeatingOption.isEmpty() || repeatingOption.isBlank() || repeatingOption.equals("queue")) {
+            boolean newQueueLoop = !musicManager.scheduler.queueLoop;
+            musicManager.scheduler.queueLoop = newQueueLoop;
+
+            embedMessage.setDescription(newQueueLoop ? "Now looping the **queue**." : "Looping is now **disabled**.");
+        } else if (repeatingOption.equals("track")) {
+            final boolean newRepeating = !musicManager.scheduler.repeating;
+            musicManager.scheduler.repeating = newRepeating;
+
+            embedMessage.setDescription(newRepeating ? "Now looping the **current track**." : "Looping is now **disabled**.");
+        } else if (repeatingOption.equals("off")) {
+            musicManager.scheduler.repeating = false;
+            musicManager.scheduler.queueLoop = false;
+
+            embedMessage.setDescription("Looping is now **disabled**.");
+        }
+
+        channel.sendMessage(embedMessage.build()).queue();
     }
 
     @Override
     public String getName() {
-        return "repeat";
+        return "loop";
     }
 
     @Override
@@ -56,6 +74,6 @@ public class RepeatCommand implements ICommand {
 
     @Override
     public List<String> getAliases() {
-        return List.of("r");
+        return List.of("loop", "ql", "queueloop");
     }
 }
