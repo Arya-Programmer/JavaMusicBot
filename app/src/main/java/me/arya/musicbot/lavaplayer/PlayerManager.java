@@ -50,6 +50,7 @@ public class PlayerManager {
                         .append(track.getInfo().title)
                         .append("` by `")
                         .append(track.getInfo().author)
+                        .append("`")
                         .queue();
             }
 
@@ -70,7 +71,7 @@ public class PlayerManager {
         });
     }
 
-    private static PlayerManager getInstance() {
+    public static PlayerManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new PlayerManager();
         }
