@@ -26,32 +26,35 @@ public class QueueCommand implements ICommand {
             return;
         }
 
-        final int trackCount = Math.min(queue.size(), 20);
+        final int trackCount = Math.min(queue.size(), 10);
         final List<AudioTrack> trackList = new ArrayList<>(queue);
-        final MessageAction messageAction = channel.sendMessage("**Current Queue:**\n");
+        final MessageAction messageAction = channel.sendMessage("**Current Queue:**\n").append("```haskell\n");
 
         for (int i=0; i < trackCount; i++) {
             final AudioTrack track = trackList.get(i);
             final AudioTrackInfo info = track.getInfo();
 
-            messageAction.append('#')
-                    .append(String.valueOf(i+1))
-                    .append(" `")
-                    .append(info.title)
-                    .append(" by ")
-                    .append(info.author)
-                    .append("` [`")
-                    .append(formatTime(track.getDuration()))
-                    .append("`]\n");
+            messageAction.append(String.valueOf(i+1))
+                    .append(") ");
 
-            if (trackList.size() > trackCount) {
-                messageAction.append("And")
-                        .append(String.valueOf(trackList.size() - trackCount))
-                        .append("` more...");
+            if (info.title.length() < 39) {
+                messageAction.append(info.title);
+                for (int j=0; j < (40-info.title.length()); j++) messageAction.append(" ");
+            } else {
+                messageAction.append(info.title.substring(0, 38))
+                        .append("   ");
             }
-
-            messageAction.queue();
+            messageAction.append(formatTime(track.getDuration()))
+                    .append("\n");
         }
+
+        if (trackList.size() > trackCount) {
+            messageAction.append("\n    ")
+                    .append(String.valueOf(trackList.size() - trackCount))
+                    .append(" more track(s)");
+        }
+
+        messageAction.append("```").queue();
     }
 
     private String formatTime(long timeInMillis) {

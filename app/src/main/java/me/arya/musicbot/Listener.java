@@ -1,8 +1,11 @@
 package me.arya.musicbot;
 
 
+import me.arya.musicbot.lavaplayer.GuildMusicManager;
+import me.arya.musicbot.lavaplayer.PlayerManager;
 import me.duncte123.botcommons.BotCommons;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
@@ -38,5 +41,14 @@ public class Listener extends ListenerAdapter {
         if (raw.startsWith(prefix)) {
             manager.handle(event);
         }
+    }
+
+    @Override
+    public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
+        final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+
+        musicManager.scheduler.repeating = false;
+        musicManager.scheduler.queue.clear();
+        musicManager.audioPlayer.stopTrack();
     }
 }
