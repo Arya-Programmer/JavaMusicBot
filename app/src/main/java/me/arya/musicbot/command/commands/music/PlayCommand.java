@@ -3,6 +3,7 @@ package me.arya.musicbot.command.commands.music;
 import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.ICommand;
+import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -22,7 +23,14 @@ public class PlayCommand implements ICommand {
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
 
+        final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
+
         if (ctx.getArgs().isEmpty()) {
+            if (musicManager.scheduler.player.isPaused() && !musicManager.scheduler.queue.isEmpty()) {
+                musicManager.scheduler.player.setPaused(false);
+                channel.sendMessage("Player resumed").queue();
+                return;
+            }
             channel.sendMessage("Correct usage is `" +
                     Config.get("prefix") +
                     "play <YoutubeURL>`").queue();

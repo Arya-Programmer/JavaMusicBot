@@ -38,7 +38,7 @@ public class PauseCommand implements ICommand {
 
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
 
-        musicManager.scheduler.player.stopTrack();
+        musicManager.scheduler.player.setPaused(true);
 
         channel.sendMessage("Player Paused").queue();
     }
