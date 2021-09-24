@@ -1,0 +1,1 @@
+worker: java -jar app/build/libs/app-0.5-all.jar

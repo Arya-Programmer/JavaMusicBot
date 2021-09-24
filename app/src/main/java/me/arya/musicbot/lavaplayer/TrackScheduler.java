@@ -9,8 +9,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class TrackScheduler extends AudioEventAdapter {
-    private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue;
+    public final AudioPlayer player;
+    public final BlockingQueue<AudioTrack> queue;
+    public boolean repeating = false;
+    public boolean queueLoop = false;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
@@ -19,12 +21,17 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void queue(AudioTrack track) {
         if (!this.player.startTrack(track, true)) {
+            if (this.repeating) {
+                this.player.startTrack(track.makeClone(), false);
+                return;
+            }
+            //noinspection ResultOfMethodCallIgnored
             this.queue.offer(track);
         }
     }
 
     public void nextTrack() {
-        this.player.startTrack(this.queue.poll(), false);
+        this.player.startTrack(queueLoop ? this.queue.poll() : this.queue.peek(), false);
     }
 
     @Override

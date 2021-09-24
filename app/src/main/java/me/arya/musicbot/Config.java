@@ -4,9 +4,10 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class Config {
 
-    private static final Dotenv dotenv = Dotenv.load();
+    private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     public static String get(String key) {
-        return dotenv.get(key.toUpperCase());
+        final String s = key.toUpperCase();
+        return dotenv.get(s, System.getenv().get(s));
     }
 }

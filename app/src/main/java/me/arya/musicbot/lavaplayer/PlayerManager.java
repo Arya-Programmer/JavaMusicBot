@@ -1,7 +1,6 @@
 package me.arya.musicbot.lavaplayer;
 
 
-import com.iwebpp.crypto.TweetNaclFast;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -12,7 +11,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerManager {
@@ -50,12 +52,28 @@ public class PlayerManager {
                         .append(track.getInfo().title)
                         .append("` by `")
                         .append(track.getInfo().author)
+                        .append("`")
                         .queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                final List<AudioTrack> tracks = playlist.getTracks();
+                if (isUrl(trackUrl)) {
 
+                    channel.sendMessage("Adding to queue: `")
+                            .append(String.valueOf(tracks.size()))
+                            .append("` tracks from playlist `")
+                            .append(playlist.getName())
+                            .append("`")
+                            .queue();
+
+                    for (final AudioTrack track : tracks) {
+                        musicManager.scheduler.queue(track);
+                    }
+                } else {
+                    trackLoaded(tracks.get(0));
+                }
             }
 
             @Override
@@ -70,10 +88,20 @@ public class PlayerManager {
         });
     }
 
-    private static PlayerManager getInstance() {
+    public static PlayerManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new PlayerManager();
         }
         return INSTANCE;
+    }
+
+
+    private boolean isUrl(String url) {
+        try {
+            final URI uri = new URI(url);
+            return !String.valueOf(uri).equals(url);
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 }
