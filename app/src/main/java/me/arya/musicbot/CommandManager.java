@@ -24,6 +24,7 @@ public class CommandManager {
         addCommand(new StopCommand());
         addCommand(new PauseCommand());
         addCommand(new SkipCommand());
+        addCommand(new NowPlayingCommand());
     }
 
     private void addCommand(ICommand cmd) {
