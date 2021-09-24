@@ -15,6 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class QueueCommand implements ICommand {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
@@ -22,7 +23,7 @@ public class QueueCommand implements ICommand {
         final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
 
         if (queue.isEmpty()) {
-            channel.sendMessage("The queue is currently empty").queue();
+            channel.sendMessage("```The queue is empty ;-;```").queue();
             return;
         }
 
@@ -37,11 +38,11 @@ public class QueueCommand implements ICommand {
             messageAction.append(String.valueOf(i+1))
                     .append(") ");
 
-            if (info.title.length() < 39) {
+            if (info.title.length() < 40) {
                 messageAction.append(info.title);
                 for (int j=0; j < (40-info.title.length()); j++) messageAction.append(" ");
             } else {
-                messageAction.append(info.title.substring(0, 38))
+                messageAction.append(info.title.substring(0, 39))
                         .append("   ");
             }
             messageAction.append(formatTime(track.getDuration()))
@@ -62,7 +63,8 @@ public class QueueCommand implements ICommand {
         final long minutes = timeInMillis / TimeUnit.MINUTES.toMillis(1);
         final long seconds = timeInMillis % TimeUnit.MINUTES.toMillis(1) / TimeUnit.SECONDS.toMillis(1);
 
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        if (hours > 0) return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        return String.format("%02d:%02d", minutes, seconds);
     }
 
     @Override
