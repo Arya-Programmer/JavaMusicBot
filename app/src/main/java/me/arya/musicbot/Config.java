@@ -3,19 +3,14 @@ package me.arya.musicbot;
 import io.github.cdimascio.dotenv.DotEnvException;
 import io.github.cdimascio.dotenv.Dotenv;
 
+import java.util.Map;
+
 public class Config {
 
-    private static Object dotenv;
-
-    public Config() {
-        try {
-            dotenv = Dotenv.load();
-        } catch DotEnvException e {
-            dotenv = System.getenv();
-        }
-    }
+    private static Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     public static String get(String key) {
-        return dotenv.get(key.toUpperCase());
+        final String s = key.toUpperCase();
+        return dotenv.get(s, System.getenv().get(s));
     }
 }
