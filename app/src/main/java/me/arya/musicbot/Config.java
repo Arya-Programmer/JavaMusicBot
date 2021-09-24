@@ -8,9 +8,10 @@ public class Config {
 
     public static String get(String key) {
         key = key.toUpperCase();
-        if (System.getenv().get(key) == null) {
+        try {
             return dotenv.get(key);
+        } catch (ExceptionInInitializerError e) {
+            return System.getenv().get(key);
         }
-        return System.getenv().get(key);
     }
 }
