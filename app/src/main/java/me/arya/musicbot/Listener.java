@@ -45,6 +45,10 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceLeave(@Nonnull GuildVoiceLeaveEvent event) {
+        if (!event.getMember().getId().equals(event.getJDA().getSelfUser().getId())) {
+            return;
+        }
+
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 
         musicManager.scheduler.repeating = false;
