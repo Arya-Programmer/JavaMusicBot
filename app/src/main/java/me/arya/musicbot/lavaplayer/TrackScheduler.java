@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -32,9 +33,13 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void nextTrack() {
-        // Queue loop not working
         AudioTrack nextTrackInQueue = this.queue.peek();
-        this.player.startTrack(queueLoop ? this.queue.poll() : nextTrackInQueue, false);
+        if (nextTrackInQueue == null && this.queue.size() > 1 && queueLoop) {
+            final List<AudioTrack> audioTracks = this.queue.stream().toList();
+            this.queue.clear();
+            this.queue.addAll(audioTracks);
+        }
+        this.player.startTrack(queueLoop ? nextTrackInQueue.makeClone() : this.queue.poll(), false);
     }
 
     @Override
