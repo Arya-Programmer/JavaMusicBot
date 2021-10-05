@@ -1,6 +1,7 @@
 package me.arya.musicbot.command.commands.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
@@ -25,6 +26,13 @@ public class JumpCommand implements ICommand {
             return;
         }
 
+        if (ctx.getArgs().isEmpty()) {
+            channel.sendMessage("Correct usage is `" +
+                    Config.get("prefix") +
+                    "jump <Track Number>`").queue();
+            return;
+        }
+
         final Member member = ctx.getMember();
         final GuildVoiceState memberVoiceState = member.getVoiceState();
 
@@ -46,7 +54,8 @@ public class JumpCommand implements ICommand {
             return;
         }
 
-        musicManager.scheduler.nextTrack();
+        final int trackIndex = Integer.parseInt(ctx.getArgs().get(0));
+        musicManager.scheduler.jumpToTrack(trackIndex);
         channel.sendMessage("Skipped").queue();
     }
 

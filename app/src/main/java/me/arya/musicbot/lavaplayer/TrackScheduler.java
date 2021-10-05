@@ -32,14 +32,27 @@ public class TrackScheduler extends AudioEventAdapter {
         }
     }
 
-    public void nextTrack() {
+    private AudioTrack getNextTrack() {
         AudioTrack nextTrackInQueue = this.queue.peek();
         if (nextTrackInQueue == null && this.queue.size() > 1 && queueLoop) {
             final List<AudioTrack> audioTracks = this.queue.stream().toList();
             this.queue.clear();
             this.queue.addAll(audioTracks);
         }
-        this.player.startTrack(queueLoop ? nextTrackInQueue.makeClone() : this.queue.poll(), false);
+        if (!queueLoop) nextTrackInQueue = this.queue.poll();
+        return nextTrackInQueue;
+    }
+
+    public void nextTrack() {
+        AudioTrack nextTrackInQueue = getNextTrack();
+        this.player.startTrack(nextTrackInQueue.makeClone(), false);
+    }
+
+    public void jumpToTrack(int trackIndex) {
+        BlockingQueue<AudioTrack> skippedTracks = new LinkedBlockingQueue<>();
+        this.queue.drainTo(skippedTracks, trackIndex);
+        this.queue.addAll(skippedTracks);
+        this.player.startTrack(getNextTrack(), false);
     }
 
     @Override
