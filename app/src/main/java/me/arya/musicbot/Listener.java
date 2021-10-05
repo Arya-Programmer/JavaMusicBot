@@ -49,6 +49,7 @@ public class Listener extends ListenerAdapter {
 
         musicManager.scheduler.repeating = false;
         musicManager.scheduler.queue.clear();
+        musicManager.scheduler.loopingQueue.clear();
         musicManager.audioPlayer.stopTrack();
     }
 }

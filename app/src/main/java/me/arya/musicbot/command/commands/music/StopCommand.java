@@ -40,6 +40,7 @@ public class StopCommand implements ICommand {
 
         musicManager.scheduler.player.stopTrack();
         musicManager.scheduler.queue.clear();
+        musicManager.scheduler.loopingQueue.clear();
 
         channel.sendMessage("Queue Cleared").queue();
     }
