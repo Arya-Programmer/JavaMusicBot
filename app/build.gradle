@@ -32,6 +32,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'io.github.cdimascio:java-dotenv:5.1.1'
     implementation 'com.sedmelluq:lavaplayer:1.3.77'
+    implementation 'commons-validator:commons-validator:1.7'
 }
 
 task stage(dependsOn: ['build','shadowJar', 'clean'])

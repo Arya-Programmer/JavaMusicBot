@@ -28,6 +28,7 @@ public class CommandManager {
         addCommand(new QueueCommand());
         addCommand(new LeaveCommand());
         addCommand(new LoopCommand());
+        addCommand(new JumpCommand());
     }
 
     private void addCommand(ICommand cmd) {

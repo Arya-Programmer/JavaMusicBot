@@ -8,11 +8,10 @@ import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 public class PlayCommand implements ICommand {
@@ -67,7 +66,7 @@ public class PlayCommand implements ICommand {
         }
 
         PlayerManager.getInstance()
-                .loadAndPlay(channel, link);
+                .loadAndPlay(ctx, channel, link);
     }
 
     @Override
@@ -89,11 +88,7 @@ public class PlayCommand implements ICommand {
     }
 
     private boolean isUrl(String url) {
-        try {
-            final URI uri = new URI(url);
-            return !String.valueOf(uri).equals(url);
-        } catch (URISyntaxException e) {
-            return false;
-        }
+        UrlValidator urlValidator = new UrlValidator();
+        return urlValidator.isValid(url);
     }
 }

@@ -8,6 +8,6 @@ public class Config {
 
     public static String get(String key) {
         final String s = key.toUpperCase();
-        return dotenv.get(s, System.getenv().get(s));
+        return dotenv.get(s, System.getenv().get(s) != null ? System.getenv().get(s) : "");
     }
 }
