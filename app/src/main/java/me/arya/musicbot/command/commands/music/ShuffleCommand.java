@@ -1,7 +1,6 @@
 package me.arya.musicbot.command.commands.music;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
@@ -10,14 +9,12 @@ import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 
 public class ShuffleCommand implements ICommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShuffleCommand.class);
@@ -49,20 +46,17 @@ public class ShuffleCommand implements ICommand {
             return;
         }
 
-        final ArrayList<AudioTrack> loopingQueue = musicManager.scheduler.loopingQueue;
-        final boolean shuffle = musicManager.scheduler.shuffle;
+        final List<AudioTrack> loopingQueue = new ArrayList<>(musicManager.scheduler.loopingQueue);
+        final boolean shuffle = !musicManager.scheduler.shuffle;
+        musicManager.scheduler.shuffle = shuffle;
         if (shuffle) {
-            musicManager.scheduler.shuffle = !shuffle;
-
-            musicManager.scheduler.queue.clear();
-            musicManager.scheduler.queue.addAll(loopingQueue);
-        } else {
-            musicManager.scheduler.shuffle = !shuffle;
             Collections.shuffle(loopingQueue);
-
-            musicManager.scheduler.queue.clear();
-            musicManager.scheduler.queue.addAll(loopingQueue);
         }
+
+        LOGGER.info(String.valueOf(loopingQueue == musicManager.scheduler.loopingQueue));
+
+        musicManager.scheduler.queue.clear();
+        musicManager.scheduler.queue.addAll(loopingQueue);
         final EmbedMessage embedMessage = new EmbedMessage();
 
         embedMessage.setDescription(String.format("Shuffle mode has been **%s**", shuffle ? "enabled" : "disabled"));
