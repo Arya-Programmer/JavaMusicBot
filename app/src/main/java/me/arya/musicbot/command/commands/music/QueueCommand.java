@@ -55,12 +55,13 @@ public class QueueCommand implements ICommand {
                 trackString.append(info.title, 0, 39).append("   ");
             }
 
-            trackString.append(formatTime(track.getDuration()))
-                    .append("\n");
-
             if (i == indexCurrentTrack) {
+                trackString.append(formatTime(currentTrack.getDuration() - currentTrack.getPosition()))
+                        .append(" left\n");
                 trackString = wrapCurrentTrack(trackString);
-            }
+
+            } else trackString.append(formatTime(track.getDuration())).append("\n");
+
             messageAction.append(trackString.toString());
         }
 
