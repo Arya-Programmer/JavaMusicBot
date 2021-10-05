@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,11 +15,12 @@ public class TrackScheduler extends AudioEventAdapter {
     public BlockingQueue<AudioTrack> queue;
     public boolean repeating = false;
     public boolean queueLoop = false;
-    private BlockingQueue<AudioTrack> loopingQueue;
+    public ArrayList<AudioTrack> loopingQueue;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
+        this.loopingQueue = new ArrayList<>();
     }
 
     public void queue(AudioTrack track) {
@@ -27,25 +29,32 @@ public class TrackScheduler extends AudioEventAdapter {
                 this.player.startTrack(track.makeClone(), false);
                 return;
             }
+            this.loopingQueue.add(track);
             //noinspection ResultOfMethodCallIgnored
             this.queue.offer(track);
         }
     }
 
     private AudioTrack getNextTrack() {
-        AudioTrack nextTrackInQueue = this.queue.peek();
-        if (nextTrackInQueue == null && this.queue.size() > 1 && queueLoop) {
-            final List<AudioTrack> audioTracks = this.queue.stream().toList();
-            this.queue.clear();
-            this.queue.addAll(audioTracks);
+        AudioTrack nextTrackInQueue = this.queue.poll();
+        if (nextTrackInQueue == null && this.loopingQueue.size() > 1) {
+            if (queueLoop) {
+                final AudioTrack audioTrack = loopingQueue.get(0);
+                return audioTrack;
+            }
+            loopingQueue.clear();
         }
-        if (!queueLoop) nextTrackInQueue = this.queue.poll();
+//        if (!queueLoop) nextTrackInQueue = this.queue.poll();
         return nextTrackInQueue;
     }
 
     public void nextTrack() {
         AudioTrack nextTrackInQueue = getNextTrack();
-        this.player.startTrack(nextTrackInQueue.makeClone(), false);
+        try {
+            this.player.startTrack(nextTrackInQueue, false);
+        } catch (IllegalStateException e) {
+            this.player.startTrack(nextTrackInQueue.makeClone(), false);
+        }
     }
 
     public void jumpToTrack(int trackIndex) {

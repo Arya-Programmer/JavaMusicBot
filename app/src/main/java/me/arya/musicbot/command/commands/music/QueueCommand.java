@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class QueueCommand implements ICommand {
@@ -23,7 +22,7 @@ public class QueueCommand implements ICommand {
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
-        final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
+        final List<AudioTrack> queue = musicManager.scheduler.loopingQueue;
 
         if (queue.isEmpty()) {
             channel.sendMessage("```The queue is empty ;-;```").queue();
@@ -36,27 +35,33 @@ public class QueueCommand implements ICommand {
         final int indexCurrentTrack = trackList.indexOf(currentTrack);
 
         final int tracksNumBeforeCurrent = Math.max(indexCurrentTrack-5, 0);
-        final int tracksNumAfterCurrent = Math.min(indexCurrentTrack+5, queue.size());
+        final int tracksNumAfterCurrent = Math.min(indexCurrentTrack+(10-Math.min(indexCurrentTrack, 5)), queue.size());
         final MessageAction messageAction = channel.sendMessage("**Current Queue:**\n").append("```haskell\n");
 
         LOGGER.info(currentTrack.getInfo().toString());
+        LOGGER.info(String.format("\nBefore current -> %s\nCurrent -> %s\nAfter current -> %s", tracksNumBeforeCurrent, indexCurrentTrack, tracksNumAfterCurrent));
 
         for (int i=tracksNumBeforeCurrent; i < tracksNumAfterCurrent; i++) {
+            StringBuilder trackString = new StringBuilder();
             final AudioTrack track = trackList.get(i);
             final AudioTrackInfo info = track.getInfo();
 
-            messageAction.append(String.valueOf(i+1))
-                    .append(") ");
-
+            trackString.append(i + 1).append(") ");
+            
             if (info.title.length() < 40) {
-                messageAction.append(info.title);
-                for (int j=0; j < (42-info.title.length()); j++) messageAction.append(" ");
+                trackString.append(info.title);
+                trackString.append(" ".repeat((42 - info.title.length())));
             } else {
-                messageAction.append(info.title.substring(0, 39))
-                        .append("   ");
+                trackString.append(info.title, 0, 39).append("   ");
             }
-            messageAction.append(formatTime(track.getDuration()))
+
+            trackString.append(formatTime(track.getDuration()))
                     .append("\n");
+
+            if (i == indexCurrentTrack) {
+                trackString = wrapCurrentTrack(trackString);
+            }
+            messageAction.append(trackString.toString());
         }
 
         messageAction.append("\n    ");
@@ -77,6 +82,11 @@ public class QueueCommand implements ICommand {
 
         if (hours > 0) return String.format("%02d:%02d:%02d", hours, minutes, seconds);
         return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    private StringBuilder wrapCurrentTrack(StringBuilder trackStringBuilder) {
+        trackStringBuilder.insert(0, "     ⬐ current track\n");
+        return trackStringBuilder.append("     ⬑ current track\n");
     }
 
     @Override
