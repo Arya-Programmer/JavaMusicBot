@@ -29,6 +29,7 @@ public class CommandManager {
         addCommand(new LeaveCommand());
         addCommand(new LoopCommand());
         addCommand(new JumpCommand());
+        addCommand(new ShuffleCommand());
     }
 
     private void addCommand(ICommand cmd) {

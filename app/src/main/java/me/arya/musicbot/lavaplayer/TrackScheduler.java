@@ -58,10 +58,11 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     public void jumpToTrack(int trackIndex) {
-        if (trackIndex < this.queue.size()) {
+        if (trackIndex < this.loopingQueue.size()) {
             BlockingQueue<AudioTrack> skippedTracks = new LinkedBlockingQueue<>();
-            this.queue.drainTo(skippedTracks, trackIndex);
-            this.player.startTrack(getNextTrack(), false);
+            this.queue.clear();
+            this.queue.addAll(loopingQueue.subList(trackIndex-1, loopingQueue.size()));
+            this.player.startTrack(loopingQueue.get(trackIndex-1), false);
         }
     }
 
