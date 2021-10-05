@@ -50,14 +50,22 @@ public class ShuffleCommand implements ICommand {
         }
 
         final ArrayList<AudioTrack> loopingQueue = musicManager.scheduler.loopingQueue;
-        Collections.shuffle(loopingQueue);
+        final boolean shuffle = musicManager.scheduler.shuffle;
+        if (shuffle) {
+            musicManager.scheduler.shuffle = !shuffle;
 
-        musicManager.scheduler.queue.clear();
-        musicManager.scheduler.queue.addAll(loopingQueue);
+            musicManager.scheduler.queue.clear();
+            musicManager.scheduler.queue.addAll(loopingQueue);
+        } else {
+            musicManager.scheduler.shuffle = !shuffle;
+            Collections.shuffle(loopingQueue);
 
+            musicManager.scheduler.queue.clear();
+            musicManager.scheduler.queue.addAll(loopingQueue);
+        }
         final EmbedMessage embedMessage = new EmbedMessage();
 
-        embedMessage.setDescription("Shuffle mode has been **enabled**");
+        embedMessage.setDescription(String.format("Shuffle mode has been **%s**", shuffle ? "enabled" : "disabled"));
         channel.sendMessage(embedMessage.build()).queue();
     }
 

@@ -15,6 +15,7 @@ public class TrackScheduler extends AudioEventAdapter {
     public BlockingQueue<AudioTrack> queue;
     public boolean repeating = false;
     public boolean queueLoop = false;
+    public boolean shuffle = false;
     public ArrayList<AudioTrack> loopingQueue;
 
     public TrackScheduler(AudioPlayer player) {
