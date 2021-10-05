@@ -29,6 +29,7 @@ public class CommandManager {
         addCommand(new LoopCommand());
         addCommand(new JumpCommand());
         addCommand(new ShuffleCommand());
+        addCommand(new PlayNowCommand());
         addCommand(new InviteCommand());
     }
 

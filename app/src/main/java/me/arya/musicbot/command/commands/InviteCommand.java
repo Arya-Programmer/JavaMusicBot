@@ -3,9 +3,8 @@ package me.arya.musicbot.command.commands;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
-import me.arya.musicbot.lavaplayer.GuildMusicManager;
-import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.requests.restaction.InviteAction;
 
 public class InviteCommand implements ICommand {
     @Override
@@ -13,9 +12,10 @@ public class InviteCommand implements ICommand {
         final TextChannel channel = ctx.getChannel();
         final EmbedMessage embedMessage = new EmbedMessage();
 
-        embedMessage.setDescription(String.format("[invite](%s)", channel.createInvite()));
+        final String invite = channel.getJDA().getInviteUrl();
+        embedMessage.setDescription(String.format("[Click here](%s)", invite));
 
-        channel.sendMessage(embedMessage.build());
+        channel.sendMessage(embedMessage.build()).queue();
     }
 
     @Override
