@@ -48,7 +48,9 @@ public class Listener extends ListenerAdapter {
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 
         musicManager.scheduler.repeating = false;
+        musicManager.scheduler.shuffle = false;
         musicManager.scheduler.queue.clear();
+        musicManager.scheduler.loopingQueue.clear();
         musicManager.audioPlayer.stopTrack();
     }
 }

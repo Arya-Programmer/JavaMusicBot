@@ -52,6 +52,7 @@ public class PlayerManager {
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
+                LOGGER.info("Loading track");
                 musicManager.scheduler.queue(track);
 
                 final AudioTrackInfo info = track.getInfo();
@@ -68,9 +69,12 @@ public class PlayerManager {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                LOGGER.info("Loading playlist");
                 if (playlist.getTracks().size() == 1 || playlist.isSearchResult()) {
+                    LOGGER.info("One track loaded from link");
                     trackLoaded(playlist.getTracks().get(0));
-                } else if (playlist.getSelectedTrack() != null) {
+                } else if (playlist.getSelectedTrack() != null || playlist.getTracks().size() > 0) {
+                    LOGGER.info("Playlist loaded");
                     final List<AudioTrack> tracks = playlist.getTracks();
 
                     final EmbedMessage embedMessage = new EmbedMessage();
@@ -90,12 +94,12 @@ public class PlayerManager {
 
             @Override
             public void noMatches() {
-
+                LOGGER.info("No Match");
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-
+                LOGGER.info("Load failed");
             }
         });
     }

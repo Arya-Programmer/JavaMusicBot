@@ -8,51 +8,69 @@ import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class QueueCommand implements ICommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueueCommand.class);
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
-        final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
+        final List<AudioTrack> queue = musicManager.scheduler.loopingQueue;
 
         if (queue.isEmpty()) {
             channel.sendMessage("```The queue is empty ;-;```").queue();
             return;
         }
 
-        final int trackCount = Math.min(queue.size(), 10);
         final List<AudioTrack> trackList = new ArrayList<>(queue);
+
+        final AudioTrack currentTrack = musicManager.audioPlayer.getPlayingTrack();
+        final int indexCurrentTrack = trackList.indexOf(currentTrack);
+
+        final int tracksNumBeforeCurrent = Math.max(indexCurrentTrack-5, 0);
+        final int tracksNumAfterCurrent = Math.min(indexCurrentTrack+(10-Math.min(indexCurrentTrack, 5)), queue.size());
         final MessageAction messageAction = channel.sendMessage("**Current Queue:**\n").append("```haskell\n");
 
-        for (int i=0; i < trackCount; i++) {
+        LOGGER.info(currentTrack.getInfo().toString());
+        LOGGER.info(String.format("\nBefore current -> %s\nCurrent -> %s\nAfter current -> %s", tracksNumBeforeCurrent, indexCurrentTrack, tracksNumAfterCurrent));
+
+        for (int i=tracksNumBeforeCurrent; i < tracksNumAfterCurrent; i++) {
+            StringBuilder trackString = new StringBuilder();
             final AudioTrack track = trackList.get(i);
             final AudioTrackInfo info = track.getInfo();
 
-            messageAction.append(String.valueOf(i+1))
-                    .append(") ");
-
+            trackString.append(i + 1).append(") ");
+            
             if (info.title.length() < 40) {
-                messageAction.append(info.title);
-                for (int j=0; j < (40-info.title.length()); j++) messageAction.append(" ");
+                trackString.append(info.title);
+                trackString.append(" ".repeat((42 - info.title.length())));
             } else {
-                messageAction.append(info.title.substring(0, 39))
-                        .append("   ");
+                trackString.append(info.title, 0, 39).append("   ");
             }
-            messageAction.append(formatTime(track.getDuration()))
-                    .append("\n");
+
+            if (i == indexCurrentTrack) {
+                trackString.append(formatTime(currentTrack.getDuration() - currentTrack.getPosition()))
+                        .append(" left\n");
+                trackString = wrapCurrentTrack(trackString);
+
+            } else trackString.append(formatTime(track.getDuration())).append("\n");
+
+            messageAction.append(trackString.toString());
         }
 
-        if (trackList.size() > trackCount) {
-            messageAction.append("\n    ")
-                    .append(String.valueOf(trackList.size() - trackCount))
+        messageAction.append("\n    ");
+        if (trackList.size() > tracksNumAfterCurrent) {
+            messageAction.append(String.valueOf(trackList.size() - tracksNumAfterCurrent))
                     .append(" more track(s)");
+        } else {
+            messageAction.append("   This is the end of the queue!");
         }
 
         messageAction.append("```").queue();
@@ -65,6 +83,11 @@ public class QueueCommand implements ICommand {
 
         if (hours > 0) return String.format("%02d:%02d:%02d", hours, minutes, seconds);
         return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    private StringBuilder wrapCurrentTrack(StringBuilder trackStringBuilder) {
+        trackStringBuilder.insert(0, "     ⬐ current track\n");
+        return trackStringBuilder.append("     ⬑ current track\n");
     }
 
     @Override
