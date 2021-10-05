@@ -47,13 +47,13 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(CommandContext ctx, TextChannel channel, String trackUrl) {
+    public void loadAndPlay(CommandContext ctx, TextChannel channel, String trackUrl, boolean playNow) {
         final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 LOGGER.info("Loading track");
-                musicManager.scheduler.queue(track);
+                musicManager.scheduler.queue(track, playNow);
 
                 final AudioTrackInfo info = track.getInfo();
 
@@ -85,7 +85,7 @@ public class PlayerManager {
                     );
 
                     for (final AudioTrack track : tracks) {
-                        musicManager.scheduler.queue(track);
+                        musicManager.scheduler.queue(track, false);
                     }
 
                     channel.sendMessage(embedBuilder.build()).queue();

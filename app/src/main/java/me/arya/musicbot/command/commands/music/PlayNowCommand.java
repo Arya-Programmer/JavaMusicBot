@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class PlayCommand implements ICommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlayCommand.class);
+public class PlayNowCommand implements ICommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlayNowCommand.class);
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -25,14 +25,9 @@ public class PlayCommand implements ICommand {
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
 
         if (ctx.getArgs().isEmpty()) {
-            if (musicManager.scheduler.player.isPaused() && !musicManager.scheduler.queue.isEmpty()) {
-                musicManager.scheduler.player.setPaused(false);
-                channel.sendMessage("Player resumed").queue();
-                return;
-            }
             channel.sendMessage("Correct usage is `" +
                     Config.get("prefix") +
-                    "play <YoutubeURL>`").queue();
+                    "playnow <YoutubeURL>`").queue();
             return;
         }
 
@@ -66,25 +61,20 @@ public class PlayCommand implements ICommand {
         }
 
         PlayerManager.getInstance()
-                .loadAndPlay(ctx, channel, link, false);
+                .loadAndPlay(ctx, channel, link, true);
     }
 
     @Override
     public String getName() {
-        return "play";
+        return "playnow";
     }
 
     @Override
     public String getHelp() {
-        return "Plays a song\n" +
+        return "Overrides current playing song\n" +
                 "Usage: `" +
                 Config.get("prefix") +
-                "play <YoutubeURL>`";
-    }
-
-    @Override
-    public List<String> getAliases() {
-        return List.of("sing", "p");
+                "playnow <YoutubeURL>`";
     }
 
     private boolean isUrl(String url) {

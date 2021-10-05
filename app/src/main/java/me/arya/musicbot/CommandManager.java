@@ -2,8 +2,7 @@ package me.arya.musicbot;
 
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.ICommand;
-import me.arya.musicbot.command.commands.HelpCommand;
-import me.arya.musicbot.command.commands.PingCommand;
+import me.arya.musicbot.command.commands.*;
 import me.arya.musicbot.command.commands.music.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -30,6 +29,8 @@ public class CommandManager {
         addCommand(new LoopCommand());
         addCommand(new JumpCommand());
         addCommand(new ShuffleCommand());
+        addCommand(new PlayNowCommand());
+        addCommand(new InviteCommand());
     }
 
     private void addCommand(ICommand cmd) {

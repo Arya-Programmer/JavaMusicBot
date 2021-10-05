@@ -6,7 +6,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,15 +23,21 @@ public class TrackScheduler extends AudioEventAdapter {
         this.loopingQueue = new ArrayList<>();
     }
 
-    public void queue(AudioTrack track) {
-        if (!this.player.startTrack(track, true)) {
+    public void queue(AudioTrack track, boolean playNow) {
+        if (!this.player.startTrack(track, !playNow)) {
             if (this.repeating) {
                 this.player.startTrack(track.makeClone(), false);
                 return;
             }
-            this.loopingQueue.add(track);
             //noinspection ResultOfMethodCallIgnored
             this.queue.offer(track);
+        }
+        if (playNow) {
+            final ArrayList<AudioTrack> currentLoop = this.loopingQueue;
+            this.loopingQueue.add(track);
+            this.loopingQueue.addAll(currentLoop);
+        } else {
+            this.loopingQueue.add(track);
         }
     }
 
@@ -40,8 +45,7 @@ public class TrackScheduler extends AudioEventAdapter {
         AudioTrack nextTrackInQueue = this.queue.poll();
         if (nextTrackInQueue == null && this.loopingQueue.size() > 1) {
             if (queueLoop) {
-                final AudioTrack audioTrack = loopingQueue.get(0);
-                return audioTrack;
+                return loopingQueue.get(0);
             }
             loopingQueue.clear();
         }
@@ -60,10 +64,9 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void jumpToTrack(int trackIndex) {
         if (trackIndex < this.loopingQueue.size()) {
-            BlockingQueue<AudioTrack> skippedTracks = new LinkedBlockingQueue<>();
             this.queue.clear();
             this.queue.addAll(loopingQueue.subList(trackIndex-1, loopingQueue.size()));
-            this.player.startTrack(loopingQueue.get(trackIndex-1), false);
+            this.player.startTrack(loopingQueue.get(trackIndex-1).makeClone(), false);
         }
     }
 
