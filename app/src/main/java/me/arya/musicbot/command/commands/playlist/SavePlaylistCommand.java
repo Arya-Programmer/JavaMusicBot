@@ -25,7 +25,7 @@ public class SavePlaylistCommand implements ICommand {
         final long userId = ctx.getAuthor().getIdLong();
         final String playlistName = ctx.getArgs().get(0);
         final List<String> trackTitles = musicManager.scheduler.loopingQueue.stream().map(
-                (track) -> track.getInfo().title
+                (track) -> String.format("\"%s\"",track.getInfo().uri)
         ).toList();
 
         try (final PreparedStatement prepareStatement = SQLiteDataSource
