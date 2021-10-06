@@ -47,9 +47,8 @@ public class TrackScheduler extends AudioEventAdapter {
             if (queueLoop) {
                 return loopingQueue.get(0);
             }
-            loopingQueue.clear();
         }
-//        if (!queueLoop) nextTrackInQueue = this.queue.poll();
+
         return nextTrackInQueue;
     }
 

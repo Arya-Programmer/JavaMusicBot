@@ -4,6 +4,7 @@ import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.command.commands.*;
 import me.arya.musicbot.command.commands.music.*;
+import me.arya.musicbot.command.commands.playlist.*;
 import me.arya.musicbot.command.commands.settings.PrefixCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
@@ -33,6 +34,8 @@ public class CommandManager {
         addCommand(new PlayNowCommand());
         addCommand(new InviteCommand());
         addCommand(new PrefixCommand());
+        addCommand(new SavePlaylistCommand());
+        addCommand(new PlayPlaylistCommand());
     }
 
     private void addCommand(ICommand cmd) {

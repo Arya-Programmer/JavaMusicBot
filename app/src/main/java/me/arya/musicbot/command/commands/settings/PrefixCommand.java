@@ -5,7 +5,6 @@ import me.arya.musicbot.Constants;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
-import me.arya.musicbot.command.commands.music.PlayCommand;
 import me.arya.musicbot.database.SQLiteDataSource;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.Logger;
