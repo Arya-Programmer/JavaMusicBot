@@ -5,7 +5,6 @@ import me.arya.musicbot.database.SQLiteDataSource;
 import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
 import me.duncte123.botcommons.BotCommons;
-import me.duncte123.jdatuts.Constants;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
@@ -40,6 +39,7 @@ public class Listener extends ListenerAdapter {
 
         final long guildId = event.getGuild().getIdLong();
         String prefix = Constants.PREFIXES.computeIfAbsent(guildId, this::getPrefix);
+        LOGGER.info("Current prefix is "+prefix);
         String raw = event.getMessage().getContentRaw();
 
         if (raw.equalsIgnoreCase(prefix+"shutdown")
@@ -52,7 +52,7 @@ public class Listener extends ListenerAdapter {
         }
 
         if (raw.startsWith(prefix)) {
-            manager.handle(event);
+            manager.handle(event, prefix);
         }
     }
 
