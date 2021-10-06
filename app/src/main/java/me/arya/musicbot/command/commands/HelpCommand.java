@@ -3,6 +3,7 @@ package me.arya.musicbot.command.commands;
 import me.arya.musicbot.CommandManager;
 import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
+import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import net.dv8tion.jda.api.entities.TextChannel;
 
@@ -20,16 +21,19 @@ public class HelpCommand implements ICommand {
         List<String> args = ctx.getArgs();
         TextChannel channel = ctx.getChannel();
 
-        if (args.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
+        final EmbedMessage embedMessage = new EmbedMessage();
 
-            builder.append("List of commands\n");
+        if (args.isEmpty()) {
+            embedMessage.setTitle("List of commands");
 
             manager.getCommands().stream().map(ICommand::getName).forEach(
-                    (it) -> builder.append('`').append(Config.get("prefix")).append(it).append("`\n")
+                    (command) -> embedMessage.appendDescription("`")
+                            .appendDescription(Config.get("prefix"))
+                            .appendDescription(command)
+                            .appendDescription("`\n")
             );
 
-            channel.sendMessage(builder.toString()).queue();
+            channel.sendMessage(embedMessage.build()).queue();
             return;
         }
 
@@ -37,11 +41,14 @@ public class HelpCommand implements ICommand {
         ICommand command = manager.getCommand(search);
 
         if (command == null) {
-            channel.sendMessage("Nothing found for " + search).queue();
+            embedMessage.setDescription("Nothing found for `" + search);
+            channel.sendMessage(embedMessage.build()).queue();
             return;
         }
 
-        channel.sendMessage(command.getHelp()).queue();
+        embedMessage.setTitle(search.substring(0, 1).toUpperCase() + search.substring(1));
+        embedMessage.setDescription(command.getHelp());
+        channel.sendMessage(embedMessage.build()).queue();
     }
 
     @Override
