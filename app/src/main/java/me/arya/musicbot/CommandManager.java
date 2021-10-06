@@ -4,6 +4,7 @@ import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.command.commands.*;
 import me.arya.musicbot.command.commands.music.*;
+import me.arya.musicbot.command.commands.settings.PrefixCommand;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nullable;
@@ -31,6 +32,7 @@ public class CommandManager {
         addCommand(new ShuffleCommand());
         addCommand(new PlayNowCommand());
         addCommand(new InviteCommand());
+        addCommand(new PrefixCommand());
     }
 
     private void addCommand(ICommand cmd) {
@@ -60,9 +62,9 @@ public class CommandManager {
         return null;
     }
 
-    void handle(GuildMessageReceivedEvent event) {
+    void handle(GuildMessageReceivedEvent event, String prefix) {
         String[] split = event.getMessage().getContentRaw()
-                .replaceFirst("(?i)" + Pattern.quote(Config.get("prefix")), "")
+                .replaceFirst("(?i)" + Pattern.quote(prefix), "")
                 .split("\\s+");
 
         String invoke = split[0].toLowerCase();
