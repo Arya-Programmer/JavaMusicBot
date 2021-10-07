@@ -1,6 +1,8 @@
 package me.arya.musicbot.command.commands.playlist;
 
+import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
+import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.database.SQLiteDataSource;
 import me.arya.musicbot.lavaplayer.GuildMusicManager;
@@ -22,6 +24,15 @@ public class SavePlaylistCommand implements ICommand {
         final TextChannel channel = ctx.getChannel();
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
 
+        final EmbedMessage embedMessage = new EmbedMessage();
+
+        if (ctx.getArgs().isEmpty()) {
+            embedMessage.setDescription("Correct usage: " + Config.get("prefix") +
+                    "saveplaylist <Playlist Name>");
+            channel.sendMessage(embedMessage.build()).queue();
+            return;
+        }
+
         final long userId = ctx.getAuthor().getIdLong();
         final String playlistName = ctx.getArgs().get(0);
         final List<String> trackTitles = musicManager.scheduler.loopingQueue.stream().map(
@@ -35,9 +46,7 @@ public class SavePlaylistCommand implements ICommand {
             prepareStatement.setString(2, playlistName);
 
             try (final ResultSet resultSet = prepareStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    final String playlistItems = resultSet.getString("items");
-                } else {
+                if (!resultSet.next()) {
                     try (final PreparedStatement insertStatement = SQLiteDataSource
                             .getConnection()
                             .prepareStatement("INSERT INTO user_playlists(user_id, playlist_name, items) " +
@@ -47,17 +56,24 @@ public class SavePlaylistCommand implements ICommand {
                         insertStatement.setString(3, String.valueOf(trackTitles));
 
                         insertStatement.execute();
+                        embedMessage.setDescription("Saved "+trackTitles.size()+" into playlist **"+playlistName+"** " +
+                                "["+ctx.getAuthor().getAsMention()+"]");
                     }
+                } else {
+                    embedMessage.setDescription("A playlist **already exists** with that name");
                 }
             }
 
-            LOGGER.info("Playlist name " + playlistName);
-            LOGGER.info("Playlist items " + trackTitles);
-
-            channel.sendMessage("hello").queue();
         } catch (SQLException e) {
             e.printStackTrace();
+            embedMessage.setDescription("Some error occurred! please try again.");
         }
+
+
+        LOGGER.info("Playlist name " + playlistName);
+        LOGGER.info("Playlist items " + trackTitles);
+
+        channel.sendMessage(embedMessage.build()).queue();
     }
 
     @Override

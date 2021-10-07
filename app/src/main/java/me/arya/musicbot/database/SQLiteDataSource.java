@@ -48,12 +48,15 @@ public class SQLiteDataSource {
                     "prefix VARCHAR(255) NOT NULL DEFAULT '"+ defaultPrefix +"'" +
                     ");");
 
-
             statement.execute("CREATE TABLE IF NOT EXISTS user_playlists (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "user_id VARCHAR(20) NOT NULL," +
-                    "playlist_name TEXT," +
+                    "playlist_name TEXT NOT NULL," +
                     "items TEXT NOT NULL" +
+                    ");");
+
+            statement.execute("CREATE TABLE IF NOT EXISTS premium_users (" +
+                    "user_id VARCHAR(20) NOT NULL" +
                     ");");
 
             LOGGER.info("Table initialised");

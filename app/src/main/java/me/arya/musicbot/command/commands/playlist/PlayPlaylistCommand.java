@@ -1,6 +1,8 @@
 package me.arya.musicbot.command.commands.playlist;
 
+import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
+import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.database.SQLiteDataSource;
 import me.arya.musicbot.lavaplayer.PlayerManager;
@@ -20,6 +22,15 @@ public class PlayPlaylistCommand implements ICommand {
     @Override
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
+
+        final EmbedMessage embedMessage = new EmbedMessage();
+
+        if (ctx.getArgs().isEmpty()) {
+                embedMessage.setDescription("Correct usage: " + Config.get("prefix") +
+                        "playplaylist <Playlist Name>");
+                channel.sendMessage(embedMessage.build()).queue();
+                return;
+        }
 
         final long userId = ctx.getAuthor().getIdLong();
         final String playlistName = ctx.getArgs().get(0);
@@ -42,13 +53,19 @@ public class PlayPlaylistCommand implements ICommand {
                         PlayerManager.getInstance()
                                 .loadAndPlayQuietly(ctx, channel, track);
                     }
+
+                    embedMessage.setDescription("Queued "+items.length+" tracks from **"+playlistName+"** " +
+                            "["+ctx.getAuthor().getAsMention()+"]");
                 } else {
-                    //
+                    embedMessage.setDescription("There is no playlist by that name");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            embedMessage.setDescription("Some error occurred! please try again.");
         }
+
+        channel.sendMessage(embedMessage.build()).queue();
 
     }
 
