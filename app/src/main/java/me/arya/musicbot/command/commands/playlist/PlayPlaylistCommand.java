@@ -4,8 +4,12 @@ import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
+import me.arya.musicbot.command.commands.music.JoinCommand;
 import me.arya.musicbot.database.SQLiteDataSource;
+import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -19,6 +23,7 @@ import java.util.Arrays;
 public class PlayPlaylistCommand implements ICommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayPlaylistCommand.class);
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void handle(CommandContext ctx) {
         final TextChannel channel = ctx.getChannel();
@@ -26,10 +31,32 @@ public class PlayPlaylistCommand implements ICommand {
         final EmbedMessage embedMessage = new EmbedMessage();
 
         if (ctx.getArgs().isEmpty()) {
-                embedMessage.setDescription("Correct usage: " + Config.get("prefix") +
-                        "playplaylist <Playlist Name>");
-                channel.sendMessage(embedMessage.build()).queue();
-                return;
+            embedMessage.setDescription("Correct usage: " + Config.get("prefix") +
+                    "playplaylist <Playlist Name>");
+            channel.sendMessage(embedMessage.build()).queue();
+            return;
+        }
+
+        final Member self = ctx.getSelfMember();
+        final GuildVoiceState selfVoiceState = self.getVoiceState();
+
+        if (!selfVoiceState.inVoiceChannel()) {
+            new JoinCommand().handle(ctx);
+        }
+
+        final Member member = ctx.getMember();
+        final GuildVoiceState memberVoiceState = member.getVoiceState();
+
+        if (!memberVoiceState.inVoiceChannel()) {
+            embedMessage.setDescription("You need to be in a voice channel for this command to work");
+            channel.sendMessage(embedMessage.build()).queue();
+            return;
+        }
+
+        if (!memberVoiceState.getChannel().equals(selfVoiceState.getChannel()) && selfVoiceState.getChannel() != null) {
+            embedMessage.setDescription("You need to be in the same voice channel as me for this to work");
+            channel.sendMessage(embedMessage.build()).queue();
+            return;
         }
 
         final long userId = ctx.getAuthor().getIdLong();
