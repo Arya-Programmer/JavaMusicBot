@@ -34,6 +34,7 @@ public class TrackScheduler extends AudioEventAdapter {
         }
         if (playNow) {
             final ArrayList<AudioTrack> currentLoop = this.loopingQueue;
+            this.loopingQueue.clear();
             this.loopingQueue.add(track);
             this.loopingQueue.addAll(currentLoop);
         } else {
@@ -43,9 +44,10 @@ public class TrackScheduler extends AudioEventAdapter {
 
     private AudioTrack getNextTrack() {
         AudioTrack nextTrackInQueue = this.queue.poll();
-        if (nextTrackInQueue == null && this.loopingQueue.size() > 1) {
+        if (nextTrackInQueue == null && !this.loopingQueue.isEmpty()) {
             if (queueLoop) {
-                return loopingQueue.get(0);
+                this.queue.addAll(loopingQueue);
+                return this.queue.poll();
             }
         }
 
@@ -65,7 +67,7 @@ public class TrackScheduler extends AudioEventAdapter {
         if (trackIndex < this.loopingQueue.size()) {
             this.queue.clear();
             this.queue.addAll(loopingQueue.subList(trackIndex-1, loopingQueue.size()));
-            this.player.startTrack(loopingQueue.get(trackIndex-1).makeClone(), false);
+            this.player.startTrack(this.queue.poll(), false);
         }
     }
 
