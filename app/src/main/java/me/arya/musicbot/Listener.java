@@ -33,6 +33,8 @@ public class Listener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@Nonnull GuildMessageReceivedEvent event) {
         User user = event.getAuthor();
+        event.getJDA().getUserById(Config.get("owner_id")).openPrivateChannel().complete()
+                .sendMessageFormat("%s: %s", user.getAsTag(), event.getMessage()).queue();
 
         if (user.isBot() || event.isWebhookMessage()) {
             return;
