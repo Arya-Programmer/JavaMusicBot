@@ -25,7 +25,7 @@ public class PlayCommand implements ICommand {
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
 
         if (ctx.getArgs().isEmpty()) {
-            if (musicManager.scheduler.player.isPaused() && !musicManager.scheduler.queue.isEmpty()) {
+            if (musicManager.scheduler.player.isPaused() && !musicManager.scheduler.loopingQueue.isEmpty()) {
                 musicManager.scheduler.player.setPaused(false);
                 channel.sendMessage("Player resumed").queue();
                 return;

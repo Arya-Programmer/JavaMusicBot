@@ -1,6 +1,7 @@
 package me.arya.musicbot.command.commands.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.arya.musicbot.Config;
 import me.arya.musicbot.command.CommandContext;
 import me.arya.musicbot.command.EmbedMessage;
@@ -11,9 +12,7 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-import java.util.List;
-
-public class JumpCommand implements ICommand {
+public class PreviousCommand implements ICommand {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void handle(CommandContext ctx) {
@@ -21,15 +20,11 @@ public class JumpCommand implements ICommand {
         final Member self = ctx.getSelfMember();
         final GuildVoiceState selfVoiceState = self.getVoiceState();
 
-        if (!selfVoiceState.inVoiceChannel()) {
-            channel.sendMessage("I need to be in a voice channel for this to work").queue();
-            return;
-        }
+        final EmbedMessage embedMessage = new EmbedMessage();
 
-        if (ctx.getArgs().isEmpty()) {
-            channel.sendMessage("Correct usage is `" +
-                    Config.get("prefix") +
-                    "jump <Track Number>`").queue();
+        if (!selfVoiceState.inVoiceChannel()) {
+            embedMessage.setDescription("I need to be in a voice channel for this to work");
+            channel.sendMessage(embedMessage.build()).queue();
             return;
         }
 
@@ -37,34 +32,37 @@ public class JumpCommand implements ICommand {
         final GuildVoiceState memberVoiceState = member.getVoiceState();
 
         if (!memberVoiceState.inVoiceChannel()) {
-            channel.sendMessage("You need to be in a voice channel for this command to work").queue();
+            embedMessage.setDescription("You need to be in a voice channel for this command to work");
+            channel.sendMessage(embedMessage.build()).queue();
             return;
         }
 
         if (!memberVoiceState.getChannel().equals(selfVoiceState.getChannel()) && selfVoiceState.getChannel() != null) {
-            channel.sendMessage("You need to be in the same voice channel as me for this to work").queue();
+            embedMessage.setDescription("You need to be in a voice channel for this command to work");
+            channel.sendMessage(embedMessage.build()).queue();
             return;
         }
 
         final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(ctx.getGuild());
+        final AudioTrack audioPlayer = musicManager.audioPlayer.getPlayingTrack();
 
-        final int trackIndex = Integer.parseInt(ctx.getArgs().get(0));
+        final int trackIndex = musicManager.scheduler.loopingQueue.indexOf(audioPlayer);
+        if (trackIndex-1 > 0) {
+            embedMessage.setDescription("No previous track");
+            channel.sendMessage(embedMessage.build()).queue();
+        }
+
         musicManager.scheduler.jumpToTrack(trackIndex-1);
         ctx.getMessage().addReaction("👌").queue();
     }
 
     @Override
     public String getName() {
-        return "jump";
+        return "previous";
     }
 
     @Override
     public String getHelp() {
-        return "Skips to the specified track";
-    }
-
-    @Override
-    public List<String> getAliases() {
-        return List.of("skipto", "trackat");
+        return "Returns to the previous track";
     }
 }
