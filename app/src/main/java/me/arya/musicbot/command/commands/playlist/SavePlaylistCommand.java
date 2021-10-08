@@ -85,4 +85,9 @@ public class SavePlaylistCommand implements ICommand {
     public String getHelp() {
         return "Saves the current queue under the specified name";
     }
+
+    @Override
+    public boolean isPremium() {
+        return true;
+    }
 }

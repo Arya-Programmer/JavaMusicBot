@@ -11,4 +11,8 @@ public interface ICommand {
     default List<String> getAliases() {
         return List.of();
     }
+
+    default boolean isPremium() {
+        return false;
+    }
 }

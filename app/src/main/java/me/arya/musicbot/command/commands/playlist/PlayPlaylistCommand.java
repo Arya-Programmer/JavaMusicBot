@@ -78,4 +78,9 @@ public class PlayPlaylistCommand implements ICommand {
     public String getHelp() {
         return "Plays the saved playlist";
     }
+
+    @Override
+    public boolean isPremium() {
+        return true;
+    }
 }

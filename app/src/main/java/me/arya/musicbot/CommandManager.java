@@ -1,14 +1,20 @@
 package me.arya.musicbot;
 
 import me.arya.musicbot.command.CommandContext;
+import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.command.commands.*;
 import me.arya.musicbot.command.commands.music.*;
 import me.arya.musicbot.command.commands.playlist.*;
 import me.arya.musicbot.command.commands.settings.*;
+import me.arya.musicbot.database.SQLiteDataSource;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nullable;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +81,12 @@ public class CommandManager {
         ICommand cmd = this.getCommand(invoke);
 
         if (cmd != null) {
+            if (cmd.isPremium() && !isUserPremium(event.getAuthor())) {
+                final EmbedMessage embedMessage = new EmbedMessage();
+                embedMessage.setDescription("You need to be a premium user to be able to user this command\n" +
+                        "Ask master to make you one");
+                event.getChannel().sendMessage(embedMessage.build()).queue();
+            }
             event.getChannel().sendTyping().queue();
             List<String> args = Arrays.asList(split).subList(1, split.length);
 
@@ -82,5 +94,24 @@ public class CommandManager {
 
             cmd.handle(ctx);
         }
+    }
+
+    private boolean isUserPremium(User author) {
+        try (final PreparedStatement prepareStatement = SQLiteDataSource
+                .getConnection()
+                .prepareStatement("SELECT * FROM premium_users WHERE user_id = ?")) {
+
+            prepareStatement.setString(1, author.getId());
+
+            try (final ResultSet resultSet = prepareStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
