@@ -55,8 +55,6 @@ public class ShuffleCommand implements ICommand {
 
         LOGGER.info(String.valueOf(loopingQueue == musicManager.scheduler.loopingQueue));
 
-        musicManager.scheduler.queue.clear();
-        musicManager.scheduler.queue.addAll(loopingQueue);
         final EmbedMessage embedMessage = new EmbedMessage();
 
         embedMessage.setDescription(String.format("Shuffle mode has been **%s**", shuffle ? "enabled" : "disabled"));

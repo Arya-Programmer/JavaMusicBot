@@ -6,12 +6,11 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+
 
 public class TrackScheduler extends AudioEventAdapter {
     public final AudioPlayer player;
-    public BlockingQueue<AudioTrack> queue;
+    public int currentIndex = 0;
     public boolean repeating = false;
     public boolean queueLoop = false;
     public boolean shuffle = false;
@@ -19,19 +18,16 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
-        this.queue = new LinkedBlockingQueue<>();
         this.loopingQueue = new ArrayList<>();
     }
 
     public void queue(AudioTrack track, boolean playNow) {
-        if (!this.player.startTrack(track, !playNow)) {
-            if (this.repeating) {
-                this.player.startTrack(track.makeClone(), false);
-                return;
-            }
-            //noinspection ResultOfMethodCallIgnored
-            this.queue.offer(track);
+        this.player.startTrack(track, !playNow);
+        if (this.repeating) {
+            this.player.startTrack(track.makeClone(), false);
+            return;
         }
+
         if (playNow) {
             final ArrayList<AudioTrack> currentLoop = this.loopingQueue;
             this.loopingQueue.clear();
@@ -43,11 +39,10 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     private AudioTrack getNextTrack() {
-        AudioTrack nextTrackInQueue = this.queue.poll();
+        AudioTrack nextTrackInQueue = this.loopingQueue.get(currentIndex);
         if (nextTrackInQueue == null && !this.loopingQueue.isEmpty()) {
             if (queueLoop) {
-                this.queue.addAll(loopingQueue);
-                return this.queue.poll();
+                currentIndex = 0;
             }
         }
 
@@ -65,9 +60,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void jumpToTrack(int trackIndex) {
         if (trackIndex < this.loopingQueue.size()) {
-            this.queue.clear();
-            this.queue.addAll(loopingQueue.subList(trackIndex, loopingQueue.size()));
-            this.player.stopTrack();
+            currentIndex = trackIndex;
             nextTrack();
         }
     }
@@ -75,6 +68,7 @@ public class TrackScheduler extends AudioEventAdapter {
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
+            currentIndex = shuffle ? (int) (Math.random() * this.loopingQueue.size()) : ++currentIndex;
             nextTrack();
         }
     }
