@@ -6,7 +6,6 @@ import me.arya.musicbot.command.EmbedMessage;
 import me.arya.musicbot.command.ICommand;
 import me.arya.musicbot.command.commands.music.JoinCommand;
 import me.arya.musicbot.database.SQLiteDataSource;
-import me.arya.musicbot.lavaplayer.GuildMusicManager;
 import me.arya.musicbot.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -80,7 +79,7 @@ public class PlayPlaylistCommand implements ICommand {
                         LOGGER.info("String of playlist items" + playlistItems);
                         for (final String track : items) {
                             PlayerManager.getInstance()
-                                    .loadAndPlayQuietly(ctx, channel, track);
+                                    .loadAndPlayQuietly(ctx, track);
                         }
 
                         embedMessage.setDescription("Queued " + items.length + " tracks from **" + playlistName + "** " +

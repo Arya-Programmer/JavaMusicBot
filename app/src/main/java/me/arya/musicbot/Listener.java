@@ -67,8 +67,9 @@ public class Listener extends ListenerAdapter {
 
                 try (final ResultSet resultSet = prepareStatement.executeQuery()) {
                     if (resultSet.next()) {
+                        final String prefix = resultSet.getString("prefix");
                         connection.close();
-                        return resultSet.getString("prefix");
+                        return prefix;
                     }
                 }
 

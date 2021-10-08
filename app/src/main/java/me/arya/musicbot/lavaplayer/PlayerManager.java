@@ -104,8 +104,8 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlayQuietly(CommandContext ctx, TextChannel channel, String trackUrl) {
-        final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
+    public void loadAndPlayQuietly(CommandContext ctx, String trackUrl) {
+        final GuildMusicManager musicManager = this.getMusicManager(ctx.getGuild());
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {

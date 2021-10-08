@@ -66,8 +66,9 @@ public class TrackScheduler extends AudioEventAdapter {
     public void jumpToTrack(int trackIndex) {
         if (trackIndex < this.loopingQueue.size()) {
             this.queue.clear();
-            this.queue.addAll(loopingQueue.subList(trackIndex-1, loopingQueue.size()));
-            this.player.startTrack(this.queue.poll(), false);
+            this.queue.addAll(loopingQueue.subList(trackIndex, loopingQueue.size()));
+            this.player.stopTrack();
+            nextTrack();
         }
     }
 
