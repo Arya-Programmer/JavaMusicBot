@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,29 +55,31 @@ public class AddPremiumCommand implements ICommand {
         LOGGER.info(ctx.getArgs().get(0));
         LOGGER.info(mentionedMembers.toString());
 
+        try {
+            final Connection connection = SQLiteDataSource.getConnection();
+            try (final PreparedStatement prepareStatement = connection
+                    .prepareStatement("SELECT * FROM premium_users WHERE user_id = ?")) {
+                prepareStatement.setString(1, String.valueOf(userId));
 
-        try (final PreparedStatement prepareStatement = SQLiteDataSource
-                .getConnection()
-                .prepareStatement("SELECT * FROM premium_users WHERE user_id = ?")) {
-            prepareStatement.setString(1, String.valueOf(userId));
+                try (final ResultSet resultSet = prepareStatement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        try (final PreparedStatement insertStatement = connection
+                                .prepareStatement("INSERT INTO premium_users(user_id) VALUES(?)")) {
+                            insertStatement.setString(1, String.valueOf(userId));
+                            insertStatement.execute();
 
-            try (final ResultSet resultSet = prepareStatement.executeQuery()) {
-                if (!resultSet.next()) {
-                    try (final PreparedStatement insertStatement = SQLiteDataSource
-                            .getConnection()
-                            .prepareStatement("INSERT INTO premium_users VALUES(?)")) {
-                        insertStatement.setString(1, String.valueOf(userId));
-
-                        embedMessage.setDescription("User " + mentionedMembers.get(0).getAsMention() +
-                                " is now **VIP**, as you requested Master");
+                            embedMessage.setDescription("User " + mentionedMembers.get(0).getAsMention() +
+                                    " is now **VIP**, as you requested Master");
+                        }
+                    } else {
+                        embedMessage.setDescription("User is already premium");
                     }
-                } else {
-                    embedMessage.setDescription("User is already premium");
                 }
+                LOGGER.info(String.valueOf(prepareStatement.isClosed()));
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            embedMessage.setDescription("So Sorry master, Some error occurred! please try again.");
         }
 
         channel.sendMessage(embedMessage.build()).queue();

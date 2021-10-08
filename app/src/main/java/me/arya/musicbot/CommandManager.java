@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -83,8 +84,8 @@ public class CommandManager {
         if (cmd != null) {
             if (cmd.isPremium() && !isUserPremium(event.getAuthor())) {
                 final EmbedMessage embedMessage = new EmbedMessage();
-                embedMessage.setDescription("You need to be a premium user to be able to user this command\n" +
-                        "Ask master to make you one");
+                embedMessage.setDescription("You need to be a premium user to be able to use this command\n" +
+                        "Ask master to become a premium user");
                 event.getChannel().sendMessage(embedMessage.build()).queue();
                 return;
             }
@@ -98,17 +99,21 @@ public class CommandManager {
     }
 
     private boolean isUserPremium(User author) {
-        try (final PreparedStatement prepareStatement = SQLiteDataSource
-                .getConnection()
-                .prepareStatement("SELECT * FROM premium_users WHERE user_id = ?")) {
+        try {
+            final Connection connection = SQLiteDataSource.getConnection();
+            try (final PreparedStatement prepareStatement = connection
+                    .prepareStatement("SELECT * FROM premium_users WHERE user_id = ?")) {
 
-            prepareStatement.setString(1, author.getId());
+                prepareStatement.setString(1, author.getId());
 
-            try (final ResultSet resultSet = prepareStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return true;
+                try (final ResultSet resultSet = prepareStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        connection.close();
+                        return true;
+                    }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

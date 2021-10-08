@@ -56,6 +56,7 @@ public class SQLiteDataSource {
                     ");");
 
             statement.execute("CREATE TABLE IF NOT EXISTS premium_users (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "user_id VARCHAR(20) NOT NULL" +
                     ");");
 

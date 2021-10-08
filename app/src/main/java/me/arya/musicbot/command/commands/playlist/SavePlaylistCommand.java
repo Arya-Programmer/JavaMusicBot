@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,36 +40,36 @@ public class SavePlaylistCommand implements ICommand {
                 (track) -> String.format("\"%s\"",track.getInfo().uri)
         ).toList();
 
-        try (final PreparedStatement prepareStatement = SQLiteDataSource
-                .getConnection()
-                .prepareStatement("SELECT * FROM user_playlists WHERE user_id = ? AND playlist_name = ?")) {
-            prepareStatement.setString(1, String.valueOf(userId));
-            prepareStatement.setString(2, playlistName);
+        try {
+            final Connection connection = SQLiteDataSource.getConnection();
+            try (final PreparedStatement prepareStatement = connection
+                    .prepareStatement("SELECT * FROM user_playlists WHERE user_id = ? AND playlist_name = ?")) {
+                prepareStatement.setString(1, String.valueOf(userId));
+                prepareStatement.setString(2, playlistName);
 
-            try (final ResultSet resultSet = prepareStatement.executeQuery()) {
-                if (!resultSet.next()) {
-                    try (final PreparedStatement insertStatement = SQLiteDataSource
-                            .getConnection()
-                            .prepareStatement("INSERT INTO user_playlists(user_id, playlist_name, items) " +
-                                    "VALUES(?,?,?)")) {
-                        insertStatement.setString(1, String.valueOf(userId));
-                        insertStatement.setString(2, String.valueOf(playlistName));
-                        insertStatement.setString(3, String.valueOf(trackTitles));
+                try (final ResultSet resultSet = prepareStatement.executeQuery()) {
+                    if (!resultSet.next()) {
+                        try (final PreparedStatement insertStatement = connection
+                                .prepareStatement("INSERT INTO user_playlists(user_id, playlist_name, items) " +
+                                        "VALUES(?,?,?)")) {
+                            insertStatement.setString(1, String.valueOf(userId));
+                            insertStatement.setString(2, String.valueOf(playlistName));
+                            insertStatement.setString(3, String.valueOf(trackTitles));
+                            insertStatement.execute();
 
-                        insertStatement.execute();
-                        embedMessage.setDescription("Saved "+trackTitles.size()+" into playlist **"+playlistName+"** " +
-                                "["+ctx.getAuthor().getAsMention()+"]");
+                            embedMessage.setDescription("Saved " + trackTitles.size() + " track(s) into playlist **" + playlistName + "** " +
+                                    "[" + ctx.getAuthor().getAsMention() + "]");
+                        }
+                    } else {
+                        embedMessage.setDescription("A playlist **already exists** with that name");
                     }
-                } else {
-                    embedMessage.setDescription("A playlist **already exists** with that name");
                 }
             }
-
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
             embedMessage.setDescription("Some error occurred! please try again.");
         }
-
 
         LOGGER.info("Playlist name " + playlistName);
         LOGGER.info("Playlist items " + trackTitles);

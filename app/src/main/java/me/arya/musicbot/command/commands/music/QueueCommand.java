@@ -38,7 +38,7 @@ public class QueueCommand implements ICommand {
         final int tracksNumAfterCurrent = Math.min(indexCurrentTrack+(10-Math.min(indexCurrentTrack, 5)), queue.size());
         final MessageAction messageAction = channel.sendMessage("**Current Queue:**\n").append("```haskell\n");
 
-        LOGGER.info(currentTrack.getInfo().toString());
+        LOGGER.info(currentTrack != null ? currentTrack.getInfo().toString() : "Current track is null");
         LOGGER.info(String.format("\nBefore current -> %s\nCurrent -> %s\nAfter current -> %s", tracksNumBeforeCurrent, indexCurrentTrack, tracksNumAfterCurrent));
 
         for (int i=tracksNumBeforeCurrent; i < tracksNumAfterCurrent; i++) {
@@ -56,6 +56,7 @@ public class QueueCommand implements ICommand {
             }
 
             if (i == indexCurrentTrack) {
+                //noinspection ConstantConditions
                 trackString.append(formatTime(currentTrack.getDuration() - currentTrack.getPosition()))
                         .append(" left\n");
                 trackString = wrapCurrentTrack(trackString);

@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,31 +63,35 @@ public class PlayPlaylistCommand implements ICommand {
         final long userId = ctx.getAuthor().getIdLong();
         final String playlistName = ctx.getArgs().get(0);
 
-        try (final PreparedStatement prepareStatement = SQLiteDataSource
-                .getConnection()
-                .prepareStatement("SELECT * FROM user_playlists WHERE user_id = ? AND playlist_name = ?")) {
-            prepareStatement.setString(1, String.valueOf(userId));
-            prepareStatement.setString(2, playlistName);
+        try {
+            final Connection connection = SQLiteDataSource.getConnection();
+            try (final PreparedStatement prepareStatement = connection
+                    .prepareStatement("SELECT * FROM user_playlists WHERE user_id = ? AND playlist_name = ?")) {
+                prepareStatement.setString(1, String.valueOf(userId));
+                prepareStatement.setString(2, playlistName);
 
-            try (final ResultSet resultSet = prepareStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    final String playlistItems = resultSet.getString("items");
-                    final Gson gson = new Gson();
-                    String[] items = gson.fromJson(playlistItems, String[].class);
+                try (final ResultSet resultSet = prepareStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        final String playlistItems = resultSet.getString("items");
+                        final Gson gson = new Gson();
+                        String[] items = gson.fromJson(playlistItems, String[].class);
 
-                    LOGGER.info("Array of playlist items"+ Arrays.toString(items));
-                    LOGGER.info("String of playlist items"+ playlistItems);
-                    for (final String track : items) {
-                        PlayerManager.getInstance()
-                                .loadAndPlayQuietly(ctx, channel, track);
+                        LOGGER.info("Array of playlist items" + Arrays.toString(items));
+                        LOGGER.info("String of playlist items" + playlistItems);
+                        for (final String track : items) {
+                            PlayerManager.getInstance()
+                                    .loadAndPlayQuietly(ctx, channel, track);
+                        }
+
+                        embedMessage.setDescription("Queued " + items.length + " tracks from **" + playlistName + "** " +
+                                "[" + ctx.getAuthor().getAsMention() + "]");
+                    } else {
+                        embedMessage.setDescription("There is no playlist by that name");
                     }
-
-                    embedMessage.setDescription("Queued "+items.length+" tracks from **"+playlistName+"** " +
-                            "["+ctx.getAuthor().getAsMention()+"]");
-                } else {
-                    embedMessage.setDescription("There is no playlist by that name");
+                    prepareStatement.close();
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
             embedMessage.setDescription("Some error occurred! please try again.");
