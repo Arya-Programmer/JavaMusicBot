@@ -86,6 +86,7 @@ public class CommandManager {
                 embedMessage.setDescription("You need to be a premium user to be able to user this command\n" +
                         "Ask master to make you one");
                 event.getChannel().sendMessage(embedMessage.build()).queue();
+                return;
             }
             event.getChannel().sendTyping().queue();
             List<String> args = Arrays.asList(split).subList(1, split.length);
