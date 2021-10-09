@@ -97,7 +97,6 @@ public class PlayPlaylistCommand implements ICommand {
         }
 
         channel.sendMessage(embedMessage.build()).queue();
-
     }
 
     @Override
