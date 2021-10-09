@@ -45,6 +45,7 @@ public class CommandManager {
         addCommand(new PlayPlaylistCommand());
         addCommand(new AddPremiumCommand());
         addCommand(new PreviousCommand());
+        addCommand(new DeletePlaylistCommand());
     }
 
     private void addCommand(ICommand cmd) {
