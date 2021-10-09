@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 
 public class DeletePlaylistCommand implements ICommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlayPlaylistCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeletePlaylistCommand.class);
 
     @Override
     public void handle(CommandContext ctx) {
